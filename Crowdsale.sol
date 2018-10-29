@@ -167,10 +167,10 @@ contract Crowdsale is Ownable {
     uint public currentStage;
 
     mapping (address => uint) public refs;
-    uint buyerRefPercent = 500;
-    uint referrerPercent = 500;
-    uint minWithdrawValue = 2 ether;
-    uint globalMinWithdrawValue = 1000 ether;
+    uint public buyerRefPercent = 500;
+    uint public referrerPercent = 500;
+    uint public minWithdrawValue = 2 ether;
+    uint public globalMinWithdrawValue = 1000 ether;
 
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 tokens, uint256 bonus);
     event Finalized();
@@ -214,7 +214,7 @@ contract Crowdsale is Ownable {
      * @dev fallback function ***DO NOT OVERRIDE***
      */
     function () external payable {
-        buyTokens(msg.sender, address(0));
+        buyTokens(address(0));
     }
 
     function setTokenPrice(uint _price) onlyOwner public {
@@ -237,11 +237,8 @@ contract Crowdsale is Ownable {
         stages[_stage].minPurchase = _minPurchase;
     }
 
-    /**
-     * @dev low level token purchase ***DO NOT OVERRIDE***
-     * @param _beneficiary Address performing the token purchase
-     */
-    function buyTokens(address _beneficiary, address _ref) public payable {
+
+    function buyTokens(address _ref) public payable {
 
         uint256 weiAmount = msg.value;
 
@@ -249,7 +246,7 @@ contract Crowdsale is Ownable {
             _updateCurrentStage();
         }
 
-        _preValidatePurchase(_beneficiary, weiAmount);
+        _preValidatePurchase(msg.sender, weiAmount);
 
         uint tokens = 0;
         uint bonusTokens = 0;
@@ -262,7 +259,7 @@ contract Crowdsale is Ownable {
 
         weiAmount = weiAmount.sub(diff);
 
-        if (_ref != address(0) && _ref != _beneficiary) {
+        if (_ref != address(0) && _ref != msg.sender) {
             uint refBonus = valueFromPercent(weiAmount, referrerPercent);
             uint buyerBonus = valueFromPercent(weiAmount, buyerRefPercent);
 
@@ -276,8 +273,8 @@ contract Crowdsale is Ownable {
             msg.sender.transfer(diff);
         }
 
-        _processPurchase(_beneficiary, totalTokens);
-        emit TokenPurchase(msg.sender, _beneficiary, weiAmount, tokens, bonusTokens);
+        _processPurchase(msg.sender, totalTokens);
+        emit TokenPurchase(msg.sender, msg.sender, msg.value, tokens, bonusTokens);
 
         _updateState(weiAmount, totalTokens);
 
@@ -505,7 +502,7 @@ contract Crowdsale is Ownable {
         }
 
         ERC20 t = ERC20(_token);
-        uint balance = token.balanceOf(this);
+        uint balance = t.balanceOf(this);
         t.safeTransfer(_to, balance);
     }
 

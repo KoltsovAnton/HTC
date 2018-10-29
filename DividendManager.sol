@@ -153,6 +153,7 @@ contract HTCDividendManager is Ownable {
         _;
     }
 
+
     constructor (address _HTCDToken, address _HTCZToken) public {
         HTCDToken = ERC20(_HTCDToken);
         HTCZToken = ERC20(_HTCZToken);
