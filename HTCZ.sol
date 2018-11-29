@@ -50,47 +50,6 @@ library SafeMath {
     }
 }
 
-
-contract Ownable {
-    mapping(address => bool) owners;
-
-    event OwnerAdded(address indexed newOwner);
-    event OwnerDeleted(address indexed owner);
-
-    /**
-     * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-     * account.
-     */
-    constructor() public {
-        owners[msg.sender] = true;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(isOwner(msg.sender));
-        _;
-    }
-
-    function addOwner(address _newOwner) external onlyOwner {
-        require(_newOwner != address(0));
-        owners[_newOwner] = true;
-        emit OwnerAdded(_newOwner);
-    }
-
-    function delOwner(address _owner) external onlyOwner {
-        require(owners[_owner]);
-        owners[_owner] = false;
-        emit OwnerDeleted(_owner);
-    }
-
-    function isOwner(address _owner) public view returns (bool) {
-        return owners[_owner];
-    }
-
-}
-
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
@@ -252,55 +211,6 @@ contract StandardToken is ERC20{
         }
         emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
         return true;
-    }
-
-
-    /**
-   * @dev Burns a specific amount of tokens.
-   * @param value The amount of token to be burned.
-   */
-    function burn(uint256 value) public {
-        _burn(msg.sender, value);
-    }
-
-    /**
-     * @dev Burns a specific amount of tokens from the target address and decrements allowance
-     * @param from address The address which you want to send tokens from
-     * @param value uint256 The amount of token to be burned
-     */
-    function burnFrom(address from, uint256 value) public {
-        _burnFrom(from, value);
-    }
-
-    /**
-   * @dev Internal function that burns an amount of the token of a given
-   * account.
-   * @param account The account whose tokens will be burnt.
-   * @param amount The amount that will be burnt.
-   */
-    function _burn(address account, uint256 amount) internal {
-        require(account != 0);
-        require(amount <= balances[account]);
-
-        _totalSupply = _totalSupply.sub(amount);
-        balances[account] = balances[account].sub(amount);
-        emit Transfer(account, address(0), amount);
-    }
-
-    /**
-     * @dev Internal function that burns an amount of the token of a given
-     * account, deducting from the sender's allowance for said account. Uses the
-     * internal burn function.
-     * @param account The account whose tokens will be burnt.
-     * @param amount The amount that will be burnt.
-     */
-    function _burnFrom(address account, uint256 amount) internal {
-        require(amount <= allowed[account][msg.sender]);
-
-        // Should https://github.com/OpenZeppelin/zeppelin-solidity/issues/707 be accepted,
-        // this function needs to emit an event with the updated approval.
-        allowed[account][msg.sender] = allowed[account][msg.sender].sub(amount);
-        _burn(account, amount);
     }
 
 }

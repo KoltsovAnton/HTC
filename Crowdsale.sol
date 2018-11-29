@@ -169,7 +169,7 @@ contract Crowdsale is Ownable {
     mapping (address => uint) public refs;
     uint public buyerRefPercent = 500;
     uint public referrerPercent = 500;
-    uint public minWithdrawValue = 2 ether;
+    uint public minWithdrawValue = 200000000000000000;
     uint public globalMinWithdrawValue = 1000 ether;
 
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 tokens, uint256 bonus);
@@ -186,16 +186,15 @@ contract Crowdsale is Ownable {
     }
 
 
-    constructor(address _wallet, ERC20 _token, uint256 _openingTime) public {
+    constructor(address _wallet, ERC20 _token) public {
         require(_wallet != address(0));
         require(_token != address(0));
-        require(_openingTime >= now);
 
         wallet = _wallet;
         token = _token;
 
         cap = 32500000;
-        openingTime = _openingTime;
+        openingTime = now;
         tokenPriceInWei = 1000000000000000;
 
         currentStage = 1;
@@ -280,17 +279,6 @@ contract Crowdsale is Ownable {
 
         _forwardFunds(weiAmount);
     }
-
-
-    //    function manualSale(address _beneficiary, uint256 _tokens) onlyOwner external {
-    //        require(_beneficiary != address(0));
-    //        require(tokensSold.add(_tokens) <= cap);
-    //        uint256 weiAmount = _tokens.mul(tokenPriceInWei);
-    //
-    //        _processPurchase(_beneficiary, _tokens);
-    //        emit TokenPurchase(msg.sender, _beneficiary, weiAmount, _tokens, 0);
-    //        _updateState(weiAmount, _tokens);
-    //    }
 
     // -----------------------------------------
     // Internal interface (extensible)
